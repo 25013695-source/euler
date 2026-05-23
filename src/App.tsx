@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import Button from './components/common/Button'
+import FlipCard from './components/common/FlipCard'
 import './App.css'
 
 function App() {
@@ -29,6 +30,14 @@ function App() {
         >
           Count is {count}
         </button>
+
+        <FlipCard
+          title="Tarjeta giratoria"
+          imageSrc={heroImg}
+          imageAlt="Hero image"
+          frontText="Haz clic en la tarjeta para verla girar y descubrir el texto del otro lado."
+          backText="Este es el reverso de la tarjeta. Todo está centrado y ocupa 70% del ancho de la pantalla."
+        />
 
         <div style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
           <Button 
