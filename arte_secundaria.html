@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Euler — Artes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+ 
+    body {
+      background: #09090f;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+ 
+    .phone-shell {
+      width: 360px;
+      height: 720px;
+      background: #0c0c18;
+      border-radius: 40px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+ 
+    /* TOP BAR */
+    .top-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      z-index: 10;
+    }
+ 
+    .back-btn {
+      background: none; border: none;
+      color: #7878a8; font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem; cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: #fff; }
+    .back-btn svg { width: 14px; height: 14px; }
+ 
+    .section-title { color: #fff; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.04em; }
+    .topic-counter  { color: #7878a8; font-size: 0.78rem; min-width: 36px; text-align: right; }
+ 
+    /* SCROLL AREA — this is what actually scrolls */
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      /* key: we scroll this wrapper, not the slides */
+    }
+    .scroll-area::-webkit-scrollbar { display: none; }
+ 
+    /* HORIZONTAL SLIDER inside the scroll area */
+    /* Width = 360 * number_of_topics, height = auto (content drives it) */
+    .slider-track {
+      display: flex;
+      align-items: flex-start;
+      width: calc(360px * 3);
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+ 
+    /* Each topic = one column, full width, content height */
+    .topic-slide {
+      width: 360px;
+      flex-shrink: 0;
+      padding: 0 0 32px;
+    }
+ 
+    /* Content blocks */
+    .slide-content { padding: 20px 18px 10px; }
+ 
+    .slide-content h2 {
+      color: #fff;
+      font-size: 1rem; font-weight: 600;
+      margin-bottom: 12px; letter-spacing: 0.01em;
+    }
+ 
+    .question {
+      color: #7878a8; font-size: 0.75rem;
+      font-style: italic; line-height: 1.55;
+      margin-bottom: 14px;
+    }
+ 
+    .slide-content p {
+      color: #c0c0d8; font-size: 0.75rem;
+      font-weight: 300; line-height: 1.65;
+      margin-bottom: 12px;
+    }
+ 
+    .img-block {
+      width: 100%; border-radius: 10px;
+      overflow: hidden; margin: 10px 0;
+      background: #1a1a2e;
+      border: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      color: #404070; font-size: 0.65rem; text-align: center;
+    }
+    .img-block img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .img-block.tall    { aspect-ratio: 3/2; }
+    .img-block.portrait{ aspect-ratio: 2/3; max-width: 200px; margin: 10px auto; }
+ 
+    .img-grid-2 {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin: 10px 0;
+    }
+    .img-grid-2 .img-block { margin: 0; aspect-ratio: 1; }
+ 
+    .img-caption {
+      color: #606080; font-size: 0.62rem;
+      text-align: center; margin-top: -6px; margin-bottom: 10px;
+    }
+ 
+    .formula-block {
+      background: #12122a; border: 1px solid #2e2e58;
+      border-radius: 10px; padding: 14px;
+      text-align: center; color: #e0e0ff;
+      font-size: 1rem; font-family: 'Georgia', serif;
+      margin: 12px 0;
+    }
+ 
+    .formula-coords {
+      background: #0e0e1e; border: 1px solid #3a3a6a;
+      border-radius: 8px; padding: 10px 14px;
+      text-align: center; color: #d0d0f0;
+      font-size: 0.88rem; font-family: 'Georgia', serif;
+      margin: 12px 0;
+    }
+ 
+    .panel-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      margin: 4px 18px 0;
+    }
+ 
+    .label-small {
+      color: #8888b0; font-size: 0.72rem;
+      font-weight: 400; margin-bottom: 4px;
+    }
+ 
+    /* BOTTOM NAV */
+    .nav-arrows {
+      flex-shrink: 0;
+      display: flex; align-items: center;
+      justify-content: center; gap: 28px;
+      padding: 12px 20px 16px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+ 
+    .arrow-btn {
+      width: 40px; height: 40px;
+      background: #13132a; border: 1px solid #2e2e58;
+      border-radius: 50%; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.12s;
+    }
+    .arrow-btn:hover  { background: #1e1e40; border-color: #5050a0; }
+    .arrow-btn:active { transform: scale(0.92); }
+    .arrow-btn:disabled { opacity: 0.22; cursor: default; }
+    .arrow-btn svg { width: 18px; height: 18px; }
+ 
+    .dots { display: flex; gap: 7px; align-items: center; }
+    .dot  { width: 6px; height: 6px; border-radius: 50%; background: #2e2e58; transition: background 0.25s, transform 0.25s; }
+    .dot.active { background: #7070c8; transform: scale(1.4); }
+ 
+    @media (max-width: 420px) {
+      .phone-shell { width: 100vw; height: 100dvh; border-radius: 0; box-shadow: none; }
+      .slider-track { width: calc(100vw * 3); }
+      .topic-slide  { width: 100vw; }
+    }
+  </style>
+</head>
+<body>
+<div class="phone-shell">
+ 
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <button class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      artes
+    </button>
+    <span class="section-title">artes</span>
+    <span class="topic-counter" id="counter">1 / 3</span>
+  </div>
+ 
+  <!-- SCROLL AREA (scrolls vertically) -->
+  <div class="scroll-area" id="scrollArea">
+ 
+    <!-- SLIDER TRACK (slides horizontally via transform) -->
+    <div class="slider-track" id="track">
+ 
+      <!-- ══ TEMA 1 — Proporción Áurea ══ -->
+      <div class="topic-slide">
+        <div class="slide-content">
+          <h2>La proporción aurea</h2>
+          <p class="question">Reflexiona: ¿Qué tienen en común estos elementos?</p>
+          <div class="img-grid-2">
+            <div class="img-block">🪙 tarjeta de crédito</div>
+            <div class="img-block">🌀 galaxia espiral</div>
+            <div class="img-block">🐚 caracol náutico</div>
+            <div class="img-block">🖼️ La Gioconda</div>
+          </div>
+          <p>Es una relación de proporcionalidad entre dos segmentos. Si divides el total entre el segmento más largo, obtienes el mismo resultado que al dividir el segmento largo entre el corto. Este número irracional se conoce como phi:</p>
+          <div class="formula-block">φ = (1 + √5) / 2 ≈ 1.618</div>
+          <p>Se considera la proporción de la "armonía estética". Desde el Renacimiento, los pintores la usaban para decidir dónde colocar los elementos clave en un lienzo. Si trazas rectángulos con esta proporción, creas la famosa "Espiral Áurea", que puedes ver en la composición de La Gioconda de Da Vinci o en la estructura del Partenón.</p>
+        </div>
+ 
+        <div class="panel-divider"></div>
+ 
+        <div class="slide-content">
+          <h2>La proporción aurea</h2>
+          <div class="img-block tall">🌀 diagrama rectángulos y espiral áurea con valores 1, 2, 3, 5, 8, 13</div>
+          <p>El concepto matemático: Es una transformación geométrica donde cada punto de una figura se mapea a otro punto a la misma distancia de un eje central (eje de simetría), pero en dirección opuesta.</p>
+          <div class="img-block tall">🖼️ Mona Lisa con superposición de espiral áurea</div>
+        </div>
+      </div>
+ 
+      <!-- ══ TEMA 2 — Mosaicos ══ -->
+      <div class="topic-slide">
+        <div class="slide-content">
+          <h2>Mosaicos</h2>
+          <p class="question">¿Por qué casi todos los pisos del mundo están hechos de cuadrados o rectángulos? ¿Por qué no usamos círculos o pentágonos?</p>
+          <p>Consiste en cubrir una superficie plana con figuras geométricas regulares o irregulares de forma que no queden huecos ni se encimen unas con otras. Para que un polígono regular tesele por sí solo, sus ángulos interiores alrededor de un vértice deben sumar exactamente 360°.</p>
+          <div class="formula-block">∑ θ = 360°</div>
+          <div class="img-block tall">🔲 mosaicos islámicos — variedad de patrones geométricos coloridos</div>
+        </div>
+ 
+        <div class="panel-divider"></div>
+ 
+        <div class="slide-content">
+          <h2>Mosaicos</h2>
+          <p>El gran maestro de esto fue M.C. Escher, quien transformaba simples cuadrados o hexágonos matemáticos en figuras de pájaros, peces y lagartijas que encajaban perfectamente. También es el principio detrás de los impresionantes mosaicos geométricos de la Alhambra en España.</p>
+          <div class="img-block tall">🐦 Escher — "Pájaros y peces" entrelazados en blanco y negro</div>
+          <p class="img-caption">M.C. Escher</p>
+          <div class="img-block tall">🕌 Alhambra — azulejos geométricos coloridos</div>
+          <p class="img-caption">Alhambra, España</p>
+        </div>
+      </div>
+ 
+      <!-- ══ TEMA 3 — La Simetría ══ -->
+      <div class="topic-slide">
+        <div class="slide-content">
+          <h2>La simetría</h2>
+          <p class="question">¿Alguna vez te has quedado congelado admirando la fachada de una enorme iglesia antigua, un mandala o los detalles de una máscara prehispánica? No es una coincidencia que te generen tanta paz visual.</p>
+          <p>El cerebro está programado para amar el orden y el equilibrio, y los artistas de todas las épocas han usado un secreto matemático para lograrlo: La Simetría por Reflexión.</p>
+          <div class="img-block tall">⛪ fachada de iglesia barroca simétrica</div>
+          <p>En matemáticas, una reflexión es una transformación geométrica que actúa exactamente como un espejo ideal. No se trata simplemente de copiar y pegar una figura al lado de la otra; se trata de voltearla de forma inversa respecto a una línea central llamada eje de simetría.</p>
+        </div>
+ 
+        <div class="panel-divider"></div>
+ 
+        <div class="slide-content">
+          <h2>La simetría</h2>
+          <p class="label-small">La fórmula de la inversión</p>
+          <div class="formula-coords">(x, y) &nbsp;→&nbsp; (−x, y)</div>
+          <p class="label-small" style="margin-top:12px;">Prueba esta actividad:</p>
+          <p>Toma la mitad de la fotografía de un rostro (humano o animal) adherida a una hoja de papel cuadriculada, traza el eje cartesiano central y, calcula las distancias de los elementos clave (ojos, comisuras, silueta) mediante las coordenadas invertidas, intenta dibujar la mitad faltante con precisión geométrica.</p>
+          <div class="img-block portrait">🧑 rostro con eje de simetría vertical</div>
+        </div>
+      </div>
+ 
+    </div><!-- /slider-track -->
+  </div><!-- /scroll-area -->
+ 
+  <!-- BOTTOM NAV -->
+  <div class="nav-arrows">
+    <button class="arrow-btn" id="prevBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <button class="arrow-btn" id="nextBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+ 
+</div>
+ 
+<script>
+  const TOTAL     = 3;
+  const SLIDE_W   = 360;
+  let current     = 0;
+ 
+  const track      = document.getElementById('track');
+  const scrollArea = document.getElementById('scrollArea');
+  const prevBtn    = document.getElementById('prevBtn');
+  const nextBtn    = document.getElementById('nextBtn');
+  const counter    = document.getElementById('counter');
+  const dots       = document.querySelectorAll('.dot');
+ 
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= TOTAL) return;
+    current = next;
+    render();
+  }
+ 
+  function render() {
+    track.style.transform  = `translateX(-${current * SLIDE_W}px)`;
+    counter.textContent    = `${current + 1} / ${TOTAL}`;
+    prevBtn.disabled       = current === 0;
+    nextBtn.disabled       = current === TOTAL - 1;
+    dots.forEach((d, i)   => d.classList.toggle('active', i === current));
+    // scroll back to top when topic changes
+    scrollArea.scrollTop   = 0;
+  }
+ 
+  prevBtn.addEventListener('click', () => navigate(-1));
+  nextBtn.addEventListener('click', () => navigate(1));
+ 
+  // Horizontal swipe to change topic (only when mostly horizontal gesture)
+  let startX = 0, startY = 0;
+  scrollArea.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+ 
+  scrollArea.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    // only trigger slide change if swipe is more horizontal than vertical
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      navigate(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+</script>
+</body>
+</html>
